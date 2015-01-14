@@ -1,0 +1,49 @@
+#!/bin/bash
+
+
+# Ensure sufficient arguments.
+if [ "x$1" = x -o "x$2" = "x" ];
+then
+  echo "Usage: makevhost example.com DocumentRoot"
+  exit 1
+fi
+
+
+dir=/etc/apache2/sites-available
+
+vhost_filename="${dir}/${1}.conf"
+if [ -e $vhost_filename ];
+then
+  echo "ERROR: a vhost file by that name already exists:"
+  ls -l $vhost_filename
+  echo "Delete the file, and try again:"
+  echo "$0 $@"
+  exit 1
+fi
+
+
+tempfile=`tempfile`
+sed -e "s;%DOMAIN%;$1;" /etc/apache2/sites-available/_template > $tempfile
+sed -i -e "s;%DOCROOT%;$2;" $tempfile
+sed -i -e "s;%DOMAIN%;$3;g" $tempfile
+
+echo "Beginning sudo calls to create site config file and enable site."
+sudo mv $tempfile $vhost_filename
+echo "Site config file created at: $vhost_filename"
+sudo chown root:root $vhost_filename
+sudo chmod a+r $vhost_filename
+sudo a2ensite $1
+sudo /etc/init.d/apache2 reload
+
+# add the domain to hosts file if not already.
+if grep "\b$1\b" /etc/hosts;
+then
+  echo Domain already present in /etc/hosts:
+  grep "\b$1\b" /etc/hosts
+else
+  tempfile=`tempfile`
+  echo "# Added by $0:" >> $tempfile
+  echo "127.0.0.1       $1" >> $tempfile
+  sudo cat $tempfile | sudo tee -a /etc/hosts > /dev/null
+fi
+
