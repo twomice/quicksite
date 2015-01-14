@@ -1,0 +1,14 @@
+# MySQL root username and password.
+mysql_root_user_name=""
+mysql_root_user_pass=""
+
+2# MySQL username and password for access to Drupal and CiviCRM databases.
+mysql_site_user_name=""
+mysql_site_user_pass=""
+
+# Directory to contain all new quicksites.
+root_directory=""
+
+# Domain on which new sites will be added as subdomains
+# (if makevhost is available -- see README.txt)
+basedomain=""
