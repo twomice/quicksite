@@ -1,0 +1,7 @@
+<VirtualHost *:80>
+    ServerAdmin as@as.as
+    DocumentRoot %DOCROOT%
+    ServerName %DOMAIN% 
+    ErrorLog /var/log/apache2/%DOMAIN%-error_log
+    CustomLog /var/log/apache2/%DOMAIN%-access_log common
+</VirtualHost>

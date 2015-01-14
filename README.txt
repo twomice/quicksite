@@ -33,9 +33,9 @@ a virtualhost for your local environment, and 2) routing of the site URL
 to your local machine. If the command "makevhost" is found in your path,
 quicksite.sh will attempt to take care of these two tasks automatically,
 by calling `makevhost "${basename}.${basedomain}" "$root_directory/$basename" 
-A `makevhost` script is included in this repo, designed to work in
-Ubuntu environments.  You may modify this script as needed and add it to
-your execution path.
+A `makevhost` script is included in this repo, under makevhost/, designed 
+to work in Ubuntu environments.  You may modify this script as needed and 
+add it to your execution path.  See makevhost/README.txt for more info.
 
 ============================
 REQUIREMENTS:
