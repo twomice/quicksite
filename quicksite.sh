@@ -55,7 +55,7 @@ if command -v makevhost >/dev/null 2>&1; then
   fi
 fi
 
-if [[ check_exists ]]; then
+if check_exists; then
   echo "One or more of the following already exist:"
   echo "  Drupal database ${db_name_drupal}"
   echo "  CiviCRM database ${db_name_civicrm}"

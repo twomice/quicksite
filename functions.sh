@@ -121,20 +121,25 @@ do_delete() {
   mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "DROP DATABASE IF EXISTS localhost_${basename}_civicrm"
 }
 
+# Check if any relevant components (document root, or mysql databases) for the
+# new site exist already.
+# Return 0 if true, 1 if false.
 check_exists() {
   if [[ -e "$root_directory/$basename" ]]; then
-    return 1;
+    return 0
   fi
 
-  line_count = $(mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "show databases like 'localhost_${basename}_drupal'" | wc -l);
-  if [[ "$line_count" > "0" ]]; then 
-    return 1;
+  line_count=$(mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "show databases like '${db_name_drupal}'" | wc -l);
+  if [[ "$line_count" > "0" ]]; then
+    return 0
   fi
 
-  line_count = $(mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "show databases like 'localhost_${basename}_civicrm'" | wc -l);
-  if [[ "$line_count" > "0" ]]; then 
-    return 1;
+  line_count=$(mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "show databases like '${db_name_civicrm}'" | wc -l);
+  if [[ "$line_count" > "0" ]]; then
+    return 0
   fi
+
+  return 1
 }
 
 download_and_extract_tarball() {
