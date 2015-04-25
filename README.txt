@@ -2,7 +2,16 @@ quicksite.sh
 Quickly spin up a Drupal/CiviCRM site from the bash command line.
 
 ============================
+DEPRECATED/UNSUPPORTED:
+This project is deprecated and will no longer be supported; it
+may also have bugs which will not be fixed.
+
+Users are encouraged to look instead at civicrm-buildkit, here:
+https://github.com/civicrm/civicrm-buildkit
+
+============================
 INSTALLATION:
+0. See "DEPRECATED/UNSUPPORTED", above.
 1. Copy config.sh.dist to config.sh
 2. Edit config.sh according to comments in that file.
    (Variables named in this README file are defined in confg.sh)
