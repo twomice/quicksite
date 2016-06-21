@@ -32,7 +32,7 @@ fi
 if [ "$#" != "3" ]; then
   echo "Usage: $0 basename drupal_version civicrm_version"
   echo "  basename: Used in a few ways:"
-  echo "    directory under $mydir to use as document root;"
+  echo "    directory under $root_directory to use as document root;"
   echo "    used in the site URL as \${basename}.${basedomain};"
   echo "    used in the site Drupal and CiviCRM directories as"
   echo "    localhost_\${basename}_drupal and localhost_\${basename}_civicrm;"
@@ -47,13 +47,6 @@ civicrm_version=$3
 
 db_name_drupal="localhost_${basename}_drupal"
 db_name_civicrm="localhost_${basename}_civicrm"
-
-if command -v makevhost >/dev/null 2>&1; then
-  if ! makevhost "${basename}.${basedomain}" "$root_directory/$basename"; then
-    echo "ERROR: makevhost failed. Exiting."
-    exit 1
-  fi
-fi
 
 if check_exists; then
   echo "One or more of the following already exist:"
@@ -77,6 +70,23 @@ if check_exists; then
   esac
 fi
 
+if command -v makevhost >/dev/null 2>&1; then
+  if ! makevhost "${basename}.${basedomain}" "$root_directory/$basename"; then
+    echo "ERROR: makevhost failed. Exiting."
+    exit 1
+  fi
+fi
+
+echo mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "
+  CREATE DATABASE ${db_name_drupal};
+  CREATE DATABASE ${db_name_civicrm};
+  GRANT ALL PRIVILEGES ON ${db_name_drupal}.* TO
+    ${mysql_site_user_name}@'localhost' IDENTIFIED BY '${mysql_site_user_pass}';
+  GRANT ALL PRIVILEGES ON ${db_name_civicrm}.* TO
+    ${mysql_site_user_name}@'localhost' IDENTIFIED BY '${mysql_site_user_pass}';
+  GRANT SUPER ON *.* TO
+    ${mysql_site_user_name}@'localhost';
+"
 mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "
   CREATE DATABASE ${db_name_drupal};
   CREATE DATABASE ${db_name_civicrm};
@@ -84,13 +94,21 @@ mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "
     ${mysql_site_user_name}@'localhost' IDENTIFIED BY '${mysql_site_user_pass}';
   GRANT ALL PRIVILEGES ON ${db_name_civicrm}.* TO
     ${mysql_site_user_name}@'localhost' IDENTIFIED BY '${mysql_site_user_pass}';
+  GRANT SUPER ON *.* TO
+    ${mysql_site_user_name}@'localhost';
 "
 
 drush dl "drupal-${drupal_version}" -y --destination=$root_directory --drupal-project-rename=$basename
 cd $root_directory/$basename
+pwd
+echo drush si -y --db-url="mysql://${mysql_site_user_name}:${mysql_site_user_pass}@localhost/${db_name_drupal}" --site-name="${basename}" --account-pass="admin"
 drush si -y --db-url="mysql://${mysql_site_user_name}:${mysql_site_user_pass}@localhost/${db_name_drupal}" --site-name="${basename}" --account-pass="admin"
 
 drupal_major_version=$(print_drupal_version)
+echo "=1=============================" >&2  
+echo "drupal_major_version: $drupal_major_version" >&2
+pwd >&2
+echo "=1=============================" >&2  
 
 mkdir -p ${mydir}/downloads
 extract_directory=$(mktemp -d $mydir/downloads/extract_XXX)
@@ -98,14 +116,15 @@ extract_directory=$(mktemp -d $mydir/downloads/extract_XXX)
 echo "Fetching source for ${civicrm_version}"
 download_and_extract_tarball $civicrm_version $extract_directory
 
-echo "Replacing CiviCRM with source for ${civicrm_version}"
+echo "Moving CiviCRM source into Drupal modules directory"
 mkdir -p $root_directory/$basename/sites/all/modules/.
 mv $extract_directory/civicrm $root_directory/$basename/sites/all/modules/.
 rm -rf $extract_directory
 
+echo Setting 
 chmod a+w $root_directory/$basename/sites/default
 chmod -R a+w $root_directory/$basename/sites/default/files
 
-curl --data "database=MySQLDatabase&mysql[server]=localhost&mysql[username]=${mysql_site_user_name}&mysql[password]=${mysql_site_user_pass}&mysql[database]=${db_name_civicrm}&drupal[server]=localhost&drupal[username]=${mysql_site_user_name}&drupal[password]=${mysql_site_user_pass}&drupal[database]=${db_name_drupal}&loadGenerated=1&go=Check+Requirements+and+Install+CiviCRM" "http://${basename}.localhost/sites/all/modules/civicrm/install/index.php" | lynx -stdin
+curl --data "database=MySQLDatabase&mysql[server]=localhost&mysql[username]=${mysql_site_user_name}&mysql[password]=${mysql_site_user_pass}&mysql[database]=${db_name_civicrm}&drupal[server]=localhost&drupal[username]=${mysql_site_user_name}&drupal[password]=${mysql_site_user_pass}&drupal[database]=${db_name_drupal}&loadGenerated=1&go=Check+Requirements+and+Install+CiviCRM" "http://${basename}.${basedomain}/sites/all/modules/civicrm/install/index.php" 
 
-echo "Site URL: http://${basename}.localhost"
+echo "Site URL: http://${basename}.${basedomain}"

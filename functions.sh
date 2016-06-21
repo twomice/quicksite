@@ -155,12 +155,21 @@ download_and_extract_tarball() {
   max_download_attempts=2
   download_attempts=0
   download_successful=0
-  
+
+  echo "==============================" >&2  
+  echo "tarball=\$(print_civicrm_tarball_name $civicrm_version $drupal_major_version)" >&2
+  echo "==============================" >&2  
+
   tarball=$(print_civicrm_tarball_name $civicrm_version $drupal_major_version)
 
   while [[ "$download_attempts" < "$max_download_attempts" && "$download_successful" == "0" ]]; do
     cd ${mydir}/downloads
-    wget -nc http://sourceforge.net/projects/civicrm/files/civicrm-stable/${civicrm_version}/${tarball}/download -O ${tarball}
+    if [[ "$civicrm_version" == *".beta"* || "$civicrm_version" == *".alpha"*  ]]; then
+      sourceforge_subdir="civicrm-testing"
+    else
+      sourceforge_subdir="civicrm-stable"
+    fi
+    wget -nc http://sourceforge.net/projects/civicrm/files/${sourceforge_subdir}/${civicrm_version}/${tarball}/download -O ${tarball}
     # Increment download_attempts counter.
     download_attempts=$((download_attempts+1))
 
@@ -188,7 +197,7 @@ print_drupal_version() {
 }
 
 smart_drush() {
-  pushd "${root_dir}/${basename}" > /dev/null
+  pushd "${root_directory}/${basename}" > /dev/null
   drush "$@"
   popd > /dev/null
 }
@@ -201,6 +210,11 @@ print_civicrm_tarball_name() {
   if version_compare "$civicrm_version" ">=" "4.1"; then
     is_over_41=1
   fi 
+
+echo "==================================" >&2
+echo "drupal_major_version: $drupal_major_version" >&2
+echo "is_over_41: $is_over_41" >&2
+echo "==================================" >&2
   
   if [[ "$is_over_41" == "1" && "$drupal_major_version" == "6" ]]; then
     drupal_6_string="6"
