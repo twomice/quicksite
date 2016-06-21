@@ -8,6 +8,15 @@ then
   exit 1
 fi
 
+function enable_site() {
+  sitename=$1
+  ret=`sudo a2ensite $1 2>&1`
+  if [[ $? == 0 ]]; then
+    echo $ret
+  else 
+    sudo a2ensite "${1}.conf"
+  fi
+}
 
 dir=/etc/apache2/sites-available
 
@@ -32,7 +41,7 @@ sudo mv $tempfile $vhost_filename
 echo "Site config file created at: $vhost_filename"
 sudo chown root:root $vhost_filename
 sudo chmod a+r $vhost_filename
-sudo a2ensite $1
+enable_site $1
 sudo /etc/init.d/apache2 reload
 
 # add the domain to hosts file if not already.
