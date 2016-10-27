@@ -12,3 +12,8 @@ root_directory=""
 # Domain on which new sites will be added as subdomains
 # (if makevhost is available -- see README.txt)
 basedomain=""
+
+# Load CiviCRM sample data?
+# 1: yes
+# 0: no
+load_sample_data=""
