@@ -2,7 +2,7 @@
 mysql_root_user_name=""
 mysql_root_user_pass=""
 
-2# MySQL username and password for access to Drupal and CiviCRM databases.
+# MySQL username and password for access to Drupal and CiviCRM databases.
 mysql_site_user_name=""
 mysql_site_user_pass=""
 
