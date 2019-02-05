@@ -41,6 +41,9 @@ if [ "$#" != "3" ]; then
   exit 1
 fi
 
+echo "Securing sudo permisssions ..."
+sudo echo "Thank you."
+
 basename=$1
 drupal_version=$2
 civicrm_version=$3
@@ -121,10 +124,21 @@ mkdir -p $root_directory/$basename/sites/all/modules/.
 mv $extract_directory/civicrm $root_directory/$basename/sites/all/modules/.
 rm -rf $extract_directory
 
-echo Setting 
+echo Setting directory permissions
 chmod a+w $root_directory/$basename/sites/default
 chmod -R a+w $root_directory/$basename/sites/default/files
 
+# Ensure we're in a real directory path so that drush runs properly.
+cd $root_directory/$basename
+# Grant perms sufficient to install civicrm by anonymous user.
+drush -r $root_directory/$basename rap 'anonymous user' 'administer site configuration'
+
+echo Installing CiviCRM via curl ...
 curl --data "database=MySQLDatabase&mysql[server]=localhost&mysql[username]=${mysql_site_user_name}&mysql[password]=${mysql_site_user_pass}&mysql[database]=${db_name_civicrm}&drupal[server]=localhost&drupal[username]=${mysql_site_user_name}&drupal[password]=${mysql_site_user_pass}&drupal[database]=${db_name_drupal}&loadGenerated=${load_sample_data}&go=Check+Requirements+and+Install+CiviCRM" "http://${basename}.${basedomain}/sites/all/modules/civicrm/install/index.php" 
 
+sudo chmod -R a+w $root_directory/$basename/sites/default/files
+
+# Revoke elevated perms from anonymous user.
+drush -r $root_directory/$basename rmp 'anonymous user' 'administer site configuration'
+ 
 echo "Site URL: http://${basename}.${basedomain}"
