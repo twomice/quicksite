@@ -116,7 +116,7 @@ version_compare() {
 
 
 do_delete() {
-  rm -rf $root_directory/$basename
+  sudo rm -rf $root_directory/$basename
   mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "DROP DATABASE IF EXISTS localhost_${basename}_drupal"
   mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "DROP DATABASE IF EXISTS localhost_${basename}_civicrm"
 }
@@ -169,7 +169,7 @@ download_and_extract_tarball() {
     else
       sourceforge_subdir="civicrm-stable"
     fi
-    wget -nc http://sourceforge.net/projects/civicrm/files/${sourceforge_subdir}/${civicrm_version}/${tarball}/download -O ${tarball}
+    wget --no-check-certificate -nc http://sourceforge.net/projects/civicrm/files/${sourceforge_subdir}/${civicrm_version}/${tarball}/download -O ${tarball}
     # Increment download_attempts counter.
     download_attempts=$((download_attempts+1))
 
