@@ -4,4 +4,10 @@
     ServerName %DOMAIN% 
     ErrorLog /var/log/apache2/%DOMAIN%-error_log
     CustomLog /var/log/apache2/%DOMAIN%-access_log common
+
+    <Directory %DOCROOT%>
+      AllowOverride All
+      Require all granted
+    </Directory>
+
 </VirtualHost>
