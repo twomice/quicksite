@@ -104,8 +104,8 @@ mysql --user=$mysql_root_user_name --password=$mysql_root_user_pass -e "
 drush dl "drupal-${drupal_version}" -y --destination=$root_directory --drupal-project-rename=$basename
 cd $root_directory/$basename
 pwd
-echo drush si -y --db-url="mysql://${mysql_site_user_name}:${mysql_site_user_pass}@localhost/${db_name_drupal}" --site-name="${basename}" --account-pass="admin"
-drush si -y --db-url="mysql://${mysql_site_user_name}:${mysql_site_user_pass}@localhost/${db_name_drupal}" --site-name="${basename}" --account-pass="admin"
+echo drush si standard -y --db-url="mysql://${mysql_site_user_name}:${mysql_site_user_pass}@localhost/${db_name_drupal}" --site-name="${basename}" --account-pass="admin"
+drush si standard -y --db-url="mysql://${mysql_site_user_name}:${mysql_site_user_pass}@localhost/${db_name_drupal}" --site-name="${basename}" --account-pass="admin"
 
 drupal_major_version=$(print_drupal_version)
 echo "=1=============================" >&2  
