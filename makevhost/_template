@@ -2,8 +2,8 @@
     ServerAdmin as@as.as
     DocumentRoot %DOCROOT%
     ServerName %DOMAIN% 
-    ErrorLog /var/log/apache2/%DOMAIN%-error_log
-    CustomLog /var/log/apache2/%DOMAIN%-access_log common
+    ErrorLog /var/log/apache2/%DOMAIN%-error.log
+    CustomLog /var/log/apache2/%DOMAIN%-access.log common
 
     <Directory %DOCROOT%>
       AllowOverride All
