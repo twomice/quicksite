@@ -1,0 +1,24 @@
+Below are example commands to do something similar for Drupal 10:
+
+Notes:
+- Various elements (paths, version numbers, etc)  are hard-coded; obvs need to change that.
+- makevhost stuff is not included here.
+- this uses composer, so the downloads/ directory is obsolete here.
+
+Commands:
+
+mysql -u root -pyogiism -e 'drop database if exists localhost_d10civi_civicrm; create database localhost_d10civi_civicrm;'
+mysql -u root -pyogiism -e 'drop database if exists localhost_d10civi_drupal; create database localhost_d10civi_drupal;'
+rm -rf /var/www/d10civi
+mkdir /var/www/d10civi
+cd /var/www/d10civi
+pwd
+composer create-project drupal/recommended-project:10.2.10 .
+composer install --no-dev
+composer require drush/drush
+drush site:install --db-url=mysql://as_master:as_master@localhost:3306/localhost_d10civi_drupal --account-name=admin --account-pass=admin --site-name=d10civi -y
+sudo ~/_laptop/projects/resetACL/resetACL.sh /var/www/d10civi/web
+composer config extra.enable-patching true
+composer require civicrm/civicrm-{core,packages,drupal-8}:5.74.4
+cv core:install --cms-base-url='http://d10civi.l' --db='mysql://as_master:as_master@localhost:3306/localhost_d10civi_civicrm' -m loadGenerated=1
+
