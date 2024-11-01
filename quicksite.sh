@@ -59,7 +59,7 @@ if check_exists; then
   echo "Do you want to delete all of them and completely and reinstall? [Y/n]"
   read confirm_delete
   case $confirm_delete in
-    [yY] | [yY][Ee][Ss] )
+    "" | [yY] | [yY][Ee][Ss] )
       echo "Deleting and re-installing."
       do_delete
       ;;
@@ -71,6 +71,8 @@ if check_exists; then
       exit 1
       ;;
   esac
+  echo "Deleting and re-installing."
+  do_delete
 fi
 
 if command -v makevhost >/dev/null 2>&1; then
@@ -130,15 +132,29 @@ chmod -R a+w $root_directory/$basename/sites/default/files
 
 # Ensure we're in a real directory path so that drush runs properly.
 cd $root_directory/$basename
-# Grant perms sufficient to install civicrm by anonymous user.
-drush -r $root_directory/$basename rap 'anonymous user' 'administer site configuration'
 
-echo Installing CiviCRM via curl ...
-curl --data "database=MySQLDatabase&mysql[server]=localhost&mysql[username]=${mysql_site_user_name}&mysql[password]=${mysql_site_user_pass}&mysql[database]=${db_name_civicrm}&drupal[server]=localhost&drupal[username]=${mysql_site_user_name}&drupal[password]=${mysql_site_user_pass}&drupal[database]=${db_name_drupal}&loadGenerated=${load_sample_data}&go=Check+Requirements+and+Install+CiviCRM" "http://${basename}.${basedomain}/sites/all/modules/civicrm/install/index.php" 
+
+if command -v cvfdsa 2>&1 >/dev/null; then
+  echo "Command 'cv' found; will attempt to install CiviCRM via 'cv' ...";
+  drush -r $root_directory/$basename en civicrm -y;
+  echo "Installing CiviCRM via 'cv' cli tool ...";
+  cv core:install --cms-base-url="http://f1576.l" -m loadGenerated=1 --db="mysql://${mysql_site_user_name}:${mysql_site_user_pass}@localhost/${db_name_civicrm}";
+
+else
+  echo "Command 'cv' not found; will attempt to install CiviCRM via 'curl' ...";
+  if [[ $(curl --head --silent --write-out "%{http_code}" --output /dev/null http://${basename}.${basedomain}/sites/all/modules/civicrm/install/index.php) != "200" ]]; then 
+    echo "ERROR: This version of civicrm doesn't support installation via curl. (You'll need to do this in-browser: log in as admin; enable the civicrm module; then visit http://${basename}.${basedomain}/civicrm/.) Exiting.";
+    exit 1;
+  fi
+  # Grant perms sufficient to install civicrm by anonymous user.
+  drush -r $root_directory/$basename rap 'anonymous user' 'administer site configuration'
+  echo Installing CiviCRM via curl ...
+  curl --data "database=MySQLDatabase&mysql[server]=localhost&mysql[username]=${mysql_site_user_name}&mysql[password]=${mysql_site_user_pass}&mysql[database]=${db_name_civicrm}&drupal[server]=localhost&drupal[username]=${mysql_site_user_name}&drupal[password]=${mysql_site_user_pass}&drupal[database]=${db_name_drupal}&loadGenerated=${load_sample_data}&go=Check+Requirements+and+Install+CiviCRM" "http://${basename}.${basedomain}/sites/all/modules/civicrm/install/index.php"
+  # Revoke elevated perms from anonymous user.
+  drush -r $root_directory/$basename rmp 'anonymous user' 'administer site configuration'
+fi
 
 sudo chmod -R a+w $root_directory/$basename/sites/default/files
 
-# Revoke elevated perms from anonymous user.
-drush -r $root_directory/$basename rmp 'anonymous user' 'administer site configuration'
  
 echo "Site URL: http://${basename}.${basedomain}"
