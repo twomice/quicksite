@@ -138,7 +138,7 @@ if command -v cv 2>&1 >/dev/null; then
   echo "Command 'cv' found; will attempt to install CiviCRM via 'cv' ...";
   drush -r $root_directory/$basename en civicrm -y;
   echo "Installing CiviCRM via 'cv' cli tool ...";
-  cv core:install --cms-base-url="http://f1576.l" -m loadGenerated=1 --db="mysql://${mysql_site_user_name}:${mysql_site_user_pass}@localhost/${db_name_civicrm}";
+  cv core:install --cms-base-url="http://${basename}.${basedomain}" -m loadGenerated=1 --db="mysql://${mysql_site_user_name}:${mysql_site_user_pass}@localhost/${db_name_civicrm}";
 
 else
   echo "Command 'cv' not found; will attempt to install CiviCRM via 'curl' ...";
